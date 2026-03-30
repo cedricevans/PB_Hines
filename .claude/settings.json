@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(curl -s \"https://qwhdeenasiollfyftdbb.supabase.co/rest/v1/hines_branch_directory?tenant_slug=eq.hines&select=branch_id,branch_slug,branch_display_name,tree_number,founder_member_id,founder_name,founder_dates_label,member_count\" -H \"apikey: sb_publishable_IKUZ3odPm81L61Zmi325uw_tdgm0Zk1\" -H \"Authorization: Bearer sb_publishable_IKUZ3odPm81L61Zmi325uw_tdgm0Zk1\" -H \"Accept: application/json\")",
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s \"https://qwhdeenasiollfyftdbb.supabase.co/rest/v1/hines_member_directory?tenant_slug=eq.hines&select=member_id,branch_id,branch_slug,display_name,dates_label,is_branch_founder,generation_level\" -H \"apikey: sb_publishable_IKUZ3odPm81L61Zmi325uw_tdgm0Zk1\" -H \"Authorization: Bearer sb_publishable_IKUZ3odPm81L61Zmi325uw_tdgm0Zk1\" -H \"Accept: application/json\")",
+      "Bash(curl -s \"https://qwhdeenasiollfyftdbb.supabase.co/rest/v1/hines_member_directory?tenant_slug=eq.hines&branch_slug=eq.johnny&select=member_id,display_name,dates_label,is_branch_founder,generation_level\" -H \"apikey: sb_publishable_IKUZ3odPm81L61Zmi325uw_tdgm0Zk1\" -H \"Authorization: Bearer sb_publishable_IKUZ3odPm81L61Zmi325uw_tdgm0Zk1\")",
+      "Bash(npm run:*)"
+    ]
+  }
+}

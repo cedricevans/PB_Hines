@@ -379,6 +379,54 @@ export const siteContent = {
           'Kimberly Sheppard   BSW Boston University',
         ],
       },
+      {
+        branch: 'Johnny Hines Branch',
+        items: [
+          'Cedric Evans   University of Florida',
+          'Danelle Bythwood   Western Michigan University',
+          'Daniel Bythwood   University of Nevada',
+          'Dinavon Bythwood   University of Miami',
+          'Danyla Bythwood   University of Florida',
+          'Kia Evans   VCU Richmond',
+          'Imani Evans   Graduate, Vanderbilt University',
+          'JC Evans   Student, James Madison University · Quarterback',
+        ],
+      },
+    ],
+  },
+  appCredits: {
+    title: 'Developed by the Evans Family',
+    callout: 'Johnny Hines Branch',
+    summary:
+      'The entire Hines family web application was developed by the Evans family to preserve their line, make updates easier to manage, and keep each generation visible for the next.',
+    websiteLabel: 'Cedric Evans · Indigo Graphix',
+    websiteHref: 'https://www.indigographix.com',
+    roles: [
+      {
+        name: 'Cedric Evans',
+        role: 'Dad · Chief Architect and Chief Information Officer',
+        note: 'Built and designed the web application experience for the family archive.',
+      },
+      {
+        name: 'JC Evans',
+        role: 'Son · CEO',
+        note: 'Represents the current generation carrying the family vision forward.',
+      },
+      {
+        name: 'Imani Evans',
+        role: 'Daughter · COO',
+        note: 'Supports the family business and the next generation of the archive.',
+      },
+      {
+        name: 'Farrell Evans',
+        role: 'Brother · Backend Developer',
+        note: 'Supports the technical structure behind the family archive.',
+      },
+      {
+        name: 'Nia Evans',
+        role: 'Mom · Financial Development and Investment Banking',
+        note: 'Helped shape the family-centered vision and long-term growth of the archive.',
+      },
     ],
   },
   descendants: {
@@ -528,7 +576,10 @@ export const siteContent = {
         tabLabel: 'Johnny Hines',
         groups: [
           { type: 'branch-head', text: 'Elouise Hines Bythwood' },
-          { type: 'child', text: 'Danelle Bythwood · Daniel Bythwood · Cedric Evans · Farrell Evans · Fredrick Evans · Kia Evans · JC Evans · Imani Evans · Danyla Bythwood · Dyasia Bythwood · Farrell Evans Jr. · Savannah Evans' },
+          { type: 'child', text: 'Danelle Bythwood · Daniel Bythwood · Dinavon Bythwood · Cedric Evans · Farrell Evans · Fredrick Evans' },
+          { type: 'grandchild', text: 'Dyasia Bythwood · Danyla Bythwood · Delieia Bythwood' },
+          { type: 'grandchild', text: 'Imani Evans · JC Evans' },
+          { type: 'grandchild', text: 'Kia Evans · Savannah Evans · Farrell EJ Evans Jr. · Fredrick Ricky Evans · Trishan Evans · Tristen Evans' },
           { type: 'branch-head', text: 'Frank Hines' },
           { type: 'branch-head', text: 'Johnny Hines' },
           { type: 'child', text: 'Johnny Hines, Jr. · Eric Frank Hines · Christopher Michael Hines' },
