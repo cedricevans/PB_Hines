@@ -109,7 +109,7 @@ export default function App() {
         if (!ignore) {
           setHubStatus({
             kind: 'archive',
-            message: `Live archive data is unavailable, so the UI is using the embedded family archive. ${error?.message ?? ''}`.trim(),
+            message: 'Live archive data is unavailable, so the UI is using the embedded family archive.',
           });
         }
       }

@@ -1,6 +1,9 @@
 import { supabase } from './supabase';
 
 const TENANT_SLUG = 'hines';
+const MEMBER_DIRECTORY_BASE_FIELDS =
+  'tenant_slug, tenant_id, member_id, branch_id, branch_slug, display_name, dates_label, is_branch_founder, generation_level, relation_to_root';
+const MEMBER_DIRECTORY_TREE_FIELDS = `${MEMBER_DIRECTORY_BASE_FIELDS}, parent_member_id, co_parent_label`;
 
 export async function fetchTenant() {
   return supabase.from('tenants').select('id, slug, display_name').eq('slug', TENANT_SLUG).maybeSingle();
@@ -17,12 +20,40 @@ export async function fetchBranchDirectory() {
 }
 
 export async function fetchMemberDirectory() {
-  return supabase
+  const result = await supabase
     .from('hines_member_directory')
-    .select(
-      'tenant_slug, tenant_id, member_id, branch_id, branch_slug, display_name, dates_label, is_branch_founder, generation_level, relation_to_root, parent_member_id, co_parent_label',
-    )
+    .select(MEMBER_DIRECTORY_TREE_FIELDS)
     .eq('tenant_slug', TENANT_SLUG);
+
+  if (!result.error) {
+    return result;
+  }
+
+  const errorMessage = result.error.message ?? '';
+  const missingTreeColumns =
+    errorMessage.includes('parent_member_id') || errorMessage.includes('co_parent_label');
+
+  if (!missingTreeColumns) {
+    return result;
+  }
+
+  const fallbackResult = await supabase
+    .from('hines_member_directory')
+    .select(MEMBER_DIRECTORY_BASE_FIELDS)
+    .eq('tenant_slug', TENANT_SLUG);
+
+  if (fallbackResult.error) {
+    return fallbackResult;
+  }
+
+  return {
+    ...fallbackResult,
+    data: (fallbackResult.data ?? []).map((member) => ({
+      ...member,
+      parent_member_id: null,
+      co_parent_label: null,
+    })),
+  };
 }
 
 export async function fetchEducationFeed() {
