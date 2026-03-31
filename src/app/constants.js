@@ -47,3 +47,35 @@ export const EMPTY_AUTH_FORM = {
 };
 
 export const SUPPORTED_APPLY_TYPES = new Set(['new_member', 'new_branch', 'education_update', 'location_update']);
+
+export const EMPTY_ADMIN_MEMBER_FORM = {
+  id: '',
+  tenantId: '',
+  branchId: '',
+  fullName: '',
+  displayName: '',
+  slug: '',
+  relationToRoot: 'descendant',
+  generationLevel: '',
+  birthLabel: '',
+  deathLabel: '',
+  datesLabel: '',
+  biography: '',
+  isBranchFounder: false,
+  isLiving: true,
+  parentMemberId: '',
+  coParentLabel: '',
+  metadata: {},
+};
+
+export const EMPTY_ADMIN_EDUCATION_FORM = {
+  id: '',
+  tenantId: '',
+  branchId: '',
+  memberId: '',
+  memberName: '',
+  credentialSummary: '',
+  graduationYear: '',
+  rawText: '',
+  sortOrder: '',
+};

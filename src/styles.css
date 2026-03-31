@@ -63,7 +63,13 @@ body {
 /* ── HERO ── */
 .hero-shell {
   min-height: 100vh;
-  background: linear-gradient(160deg, var(--dark) 0%, var(--brown) 60%, #5C3A10 100%);
+  background:
+    linear-gradient(160deg, rgba(26,18,9,0.975) 0%, rgba(61,43,14,0.935) 60%, rgba(92,58,16,0.922) 100%),
+    url('/pb_hine.PNG');
+  background-position: center center, right center;
+  background-repeat: no-repeat, no-repeat;
+  background-size: cover, min(44vw, 640px);
+  background-blend-mode: multiply, normal;
   display: flex; align-items: center; justify-content: center;
   flex-direction: column;
   position: relative; overflow: hidden;

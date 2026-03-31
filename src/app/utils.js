@@ -33,6 +33,15 @@ export function blankToNull(value) {
   return trimmed ? trimmed : null;
 }
 
+export function slugify(value) {
+  return String(value)
+    .toLowerCase()
+    .replace(/&/g, ' and ')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')
+    .replace(/-{2,}/g, '-');
+}
+
 export function getStatusTone(statusKind) {
   switch (statusKind) {
     case 'live':

@@ -20,6 +20,11 @@ import { AdminPage } from './components/admin/AdminPage';
 
 const fallbackHubData = buildFallbackHubData(siteContent);
 
+function isSupabaseLockError(error) {
+  const message = error?.message ?? '';
+  return message.includes('lock:sb-') && message.includes('stole it');
+}
+
 export default function App() {
   const [routeView, setRouteView] = useState(getRouteView);
   const [hubData, setHubData] = useState(fallbackHubData);
@@ -105,7 +110,7 @@ export default function App() {
             message: `Live archive connected for ${tenantResult.data.display_name}.`,
           });
         }
-      } catch (error) {
+      } catch (_error) {
         if (!ignore) {
           setHubStatus({
             kind: 'archive',
@@ -125,10 +130,7 @@ export default function App() {
   useEffect(() => {
     let ignore = false;
 
-    async function loadAdminIdentity() {
-      const sessionResult = await supabase.auth.getSession();
-      const session = sessionResult.data.session ?? null;
-
+    async function resolveAdminState(session) {
       if (ignore) {
         return;
       }
@@ -142,9 +144,21 @@ export default function App() {
         return;
       }
 
-      const adminResult = await checkCurrentUserAdmin();
-      const adminError =
-        adminResult.error?.code === 'PGRST202'
+      let adminResult = await checkCurrentUserAdmin();
+
+      if (adminResult.error && isSupabaseLockError(adminResult.error)) {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+
+        if (ignore) {
+          return;
+        }
+
+        adminResult = await checkCurrentUserAdmin();
+      }
+
+      const adminError = isSupabaseLockError(adminResult.error)
+        ? 'Session check is still settling. Wait a moment and try again.'
+        : adminResult.error?.code === 'PGRST202'
           ? 'The admin public API wrappers are not installed yet.'
           : adminResult.error?.message ?? '';
 
@@ -157,20 +171,8 @@ export default function App() {
       }
     }
 
-    loadAdminIdentity();
-
-    const { data } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      const adminResult = session?.user ? await checkCurrentUserAdmin() : { data: false, error: null };
-      const adminError =
-        adminResult.error?.code === 'PGRST202'
-          ? 'The admin public API wrappers are not installed yet.'
-          : adminResult.error?.message ?? '';
-
-      setAdminState({
-        user: session?.user ?? null,
-        isAdmin: Boolean(adminResult.data),
-        error: adminError,
-      });
+    const { data } = supabase.auth.onAuthStateChange((_event, session) => {
+      void resolveAdminState(session);
     });
 
     return () => {

@@ -4,6 +4,7 @@ const TENANT_SLUG = 'hines';
 const MEMBER_DIRECTORY_BASE_FIELDS =
   'tenant_slug, tenant_id, member_id, branch_id, branch_slug, display_name, dates_label, is_branch_founder, generation_level, relation_to_root';
 const MEMBER_DIRECTORY_TREE_FIELDS = `${MEMBER_DIRECTORY_BASE_FIELDS}, parent_member_id, co_parent_label`;
+const hinesDb = supabase.schema('hines');
 
 export async function fetchTenant() {
   return supabase.from('tenants').select('id, slug, display_name').eq('slug', TENANT_SLUG).maybeSingle();
@@ -98,4 +99,81 @@ export async function applyFamilyUpdateRequest(targetRequestId, adminNote) {
     target_request_id: targetRequestId,
     admin_note: adminNote,
   });
+}
+
+export async function fetchAdminFamilyMembers() {
+  return hinesDb
+    .from('family_members')
+    .select(
+      'id, tenant_id, slug, branch_id, full_name, display_name, relation_to_root, generation_level, birth_label, death_label, dates_label, biography, is_branch_founder, is_living, metadata',
+    )
+    .order('generation_level', { ascending: true, nullsFirst: true })
+    .order('display_name', { ascending: true });
+}
+
+export async function fetchAdminRelationships() {
+  return hinesDb
+    .from('member_relationships')
+    .select('id, tenant_id, branch_id, parent_member_id, child_member_id, relation_type, is_verified, source')
+    .eq('relation_type', 'parent_child');
+}
+
+export async function fetchAdminEducationRecords() {
+  return hinesDb
+    .from('member_education_records')
+    .select('id, tenant_id, branch_id, member_id, member_name, credential_summary, graduation_year, raw_text, sort_order, source')
+    .order('sort_order', { ascending: true });
+}
+
+export async function createAdminFamilyMember(payload) {
+  return hinesDb.from('family_members').insert(payload).select('id').single();
+}
+
+export async function updateAdminFamilyMember(memberId, payload) {
+  return hinesDb.from('family_members').update(payload).eq('id', memberId).select('id').single();
+}
+
+export async function deleteAdminFamilyMember(memberId) {
+  const educationResult = await hinesDb.from('member_education_records').delete().eq('member_id', memberId);
+
+  if (educationResult.error) {
+    return educationResult;
+  }
+
+  return hinesDb.from('family_members').delete().eq('id', memberId);
+}
+
+export async function replaceAdminParentRelationship({ tenantId, branchId, childMemberId, parentMemberId }) {
+  const deleteResult = await hinesDb
+    .from('member_relationships')
+    .delete()
+    .eq('tenant_id', tenantId)
+    .eq('child_member_id', childMemberId)
+    .eq('relation_type', 'parent_child');
+
+  if (deleteResult.error || !parentMemberId) {
+    return deleteResult;
+  }
+
+  return hinesDb.from('member_relationships').insert({
+    tenant_id: tenantId,
+    branch_id: branchId || null,
+    parent_member_id: parentMemberId,
+    child_member_id: childMemberId,
+    relation_type: 'parent_child',
+    is_verified: true,
+    source: 'admin_console',
+  });
+}
+
+export async function createAdminEducationRecord(payload) {
+  return hinesDb.from('member_education_records').insert(payload).select('id').single();
+}
+
+export async function updateAdminEducationRecord(recordId, payload) {
+  return hinesDb.from('member_education_records').update(payload).eq('id', recordId).select('id').single();
+}
+
+export async function deleteAdminEducationRecord(recordId) {
+  return hinesDb.from('member_education_records').delete().eq('id', recordId);
 }
