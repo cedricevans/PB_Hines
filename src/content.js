@@ -36,6 +36,62 @@ export const siteContent = {
       { value: '150+', label: 'College Degrees' },
     ],
   },
+  archiveMedia: {
+    legacySpotlight: {
+      src: '/pb_hine.PNG',
+      alt: 'Pompey B. Hines portrait',
+      eyebrow: 'Family Portrait',
+      title: 'Pompey B. Hines',
+      caption: 'Pompey B. Hines, 1845-1919',
+      note: 'Patriarch portrait preserved in the family archive.',
+    },
+    documents: [
+      {
+        src: '/E5618978-012A-40FE-9E3A-C4612ECC1780.png',
+        alt: 'Composite scan of the Charlton Hines estate documents',
+        title: 'Charlton Hines estate composite',
+        caption: 'Composite scan including inventory and emancipation records tied to the Hines family archive.',
+      },
+      {
+        src: '/20260330_204059.jpg',
+        alt: 'Harriet Golden freedom document',
+        title: 'Harriet Golden freedom paper',
+        caption: 'Document giving Harriet Golden her freedom, preserved as part of Charlton Hines’s will.',
+      },
+      {
+        src: '/20260330_203550.jpg',
+        alt: 'Charlton Hines estate inventory page',
+        title: 'Estate inventory page I',
+        caption: 'Inventory of enslaved people listed on the estate of Charlton Hines.',
+      },
+      {
+        src: '/20260330_203605.jpg',
+        alt: 'Charlton Hines estate inventory page',
+        title: 'Estate inventory page II',
+        caption: 'Additional names recorded in the estate inventory of Charlton Hines.',
+      },
+      {
+        src: '/20260330_203633.jpg',
+        alt: 'Charlton Hines estate inventory page',
+        title: 'Estate inventory page III',
+        caption: 'Additional inventory page from the Charlton Hines records.',
+      },
+      {
+        src: '/20260330_203642.jpg',
+        alt: 'Charlton Hines estate inventory page',
+        title: 'Estate inventory page IV',
+        caption: 'Later page from the Charlton Hines estate inventory scan set.',
+      },
+    ],
+    branchFounderMedia: {
+      doyle: {
+        src: '/20260330_205256.jpg',
+        alt: 'Doyle L. Hines, Sr. portrait',
+        title: 'Doyle L. Hines, Sr.',
+        caption: 'Doyle L. Hines, Sr. (1895-1989)',
+      },
+    },
+  },
   familyTree: {
     label: 'The 17 Branches',
     title: 'Biographies of the',

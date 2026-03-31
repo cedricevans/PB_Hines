@@ -10149,3 +10149,39 @@ set
   graduation_year = coalesce(excluded.graduation_year, hines.member_education_records.graduation_year),
   sort_order = excluded.sort_order,
   source = excluded.source;
+
+-- Normalize generations so Pompey B. Hines is Generation 1.
+with recursive lineage as (
+  select
+    members.id as member_id,
+    members.tenant_id,
+    1 as generation_level
+  from hines.family_members as members
+  where members.tenant_id = (select id from public.tenants where slug = 'hines')
+    and members.slug = 'member-pompey-b-hines'
+
+  union all
+
+  select
+    rel.child_member_id as member_id,
+    child.tenant_id,
+    lineage.generation_level + 1 as generation_level
+  from lineage
+  join hines.member_relationships as rel
+    on rel.parent_member_id = lineage.member_id
+   and rel.tenant_id = lineage.tenant_id
+   and rel.relation_type = 'parent_child'
+  join hines.family_members as child
+    on child.id = rel.child_member_id
+   and child.tenant_id = lineage.tenant_id
+)
+update hines.family_members as members
+set generation_level = resolved.generation_level
+from (
+  select member_id, tenant_id, max(generation_level) as generation_level
+  from lineage
+  group by member_id, tenant_id
+) as resolved
+where members.id = resolved.member_id
+  and members.tenant_id = resolved.tenant_id
+  and members.generation_level is distinct from resolved.generation_level;

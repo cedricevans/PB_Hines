@@ -284,6 +284,77 @@ section { padding: 6rem 2rem; }
   display: block; position: relative; z-index: 1;
 }
 
+.legacy-media-shell {
+  max-width: 1100px;
+  margin: 3rem auto 0;
+  display: grid;
+  grid-template-columns: 360px minmax(0, 1fr);
+  gap: 1.5rem;
+}
+
+.legacy-spotlight-card,
+.legacy-documents-card {
+  background: rgba(255,255,255,0.72);
+  border: 1px solid rgba(61,43,14,0.12);
+  padding: 1.5rem;
+  backdrop-filter: blur(8px);
+}
+
+.legacy-spotlight-card h3,
+.legacy-documents-card h3 {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.4rem;
+  color: var(--brown);
+  margin-bottom: 0.85rem;
+}
+
+.legacy-spotlight-card p {
+  margin-top: 0.9rem;
+  color: var(--text);
+}
+
+.legacy-documents-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1rem;
+}
+
+.archive-media-figure {
+  margin: 0;
+  display: grid;
+  gap: 0.7rem;
+}
+
+.archive-media-figure.is-compact {
+  gap: 0.55rem;
+}
+
+.archive-media-image {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  border: 1px solid rgba(61,43,14,0.14);
+  box-shadow: 0 14px 30px rgba(35, 23, 8, 0.12);
+  background: rgba(255,255,255,0.7);
+}
+
+.archive-media-caption {
+  display: grid;
+  gap: 0.2rem;
+}
+
+.archive-media-caption strong {
+  font-family: 'Playfair Display', serif;
+  font-size: 1.05rem;
+  color: var(--brown);
+}
+
+.archive-media-caption span {
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--text-light);
+}
+
 /* ── BRANCHES ── */
 .branches-shell {
   background: var(--dark);
@@ -435,6 +506,24 @@ section { padding: 6rem 2rem; }
   font-size: 0.95rem; line-height: 1.85;
   color: rgba(245,240,232,0.75); font-weight: 300;
   margin-bottom: 0.75rem;
+}
+
+.branch-founder-media {
+  margin-bottom: 1.1rem;
+}
+
+.branches-shell .archive-media-image {
+  border-color: rgba(201,168,76,0.16);
+  box-shadow: 0 16px 36px rgba(0,0,0,0.2);
+  background: rgba(255,255,255,0.04);
+}
+
+.branches-shell .archive-media-caption strong {
+  color: var(--gold-light);
+}
+
+.branches-shell .archive-media-caption span {
+  color: rgba(245,240,232,0.62);
 }
 
 .panel-header {
@@ -1520,6 +1609,19 @@ section { padding: 6rem 2rem; }
   margin-bottom: 0.75rem;
 }
 
+.modal-media-grid {
+  display: grid;
+  gap: 0.9rem;
+}
+
+.modal-panel .archive-media-caption strong {
+  color: var(--gold-light);
+}
+
+.modal-panel .archive-media-caption span {
+  color: rgba(245,240,232,0.7);
+}
+
 .modal-edu-list {
   display: grid;
   gap: 0.65rem;
@@ -1695,6 +1797,7 @@ section { padding: 6rem 2rem; }
   .education-feed-grid { grid-template-columns: repeat(2, 1fr); }
   .contribute-layout { grid-template-columns: 1fr; }
   .legacy-grid { gap: 3rem; }
+  .legacy-media-shell { grid-template-columns: 1fr; }
   .branch-pill-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
@@ -1723,6 +1826,7 @@ section { padding: 6rem 2rem; }
   .hero-data-grid { grid-template-columns: repeat(2, 1fr); padding: 0 1.25rem 3rem; }
   .legacy-grid { grid-template-columns: 1fr; }
   .legacy-stats-grid { grid-template-columns: 1fr 1fr; }
+  .legacy-documents-grid { grid-template-columns: 1fr; }
   .branch-story-grid { grid-template-columns: 1fr; }
   .form-grid { grid-template-columns: 1fr; }
   .form-field-wide { grid-column: span 1; }

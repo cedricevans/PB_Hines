@@ -5,7 +5,7 @@ import { getStatusTone } from '../../app/utils';
 
 /* ─── Generation label helpers ─── */
 
-const GEN_LABELS = ['', 'Founders', 'Children', 'Grandchildren', 'Great-grandchildren'];
+const GEN_LABELS = ['', 'Patriarch', 'Children', 'Grandchildren', 'Great-grandchildren'];
 
 function getGenLabel(n) {
   if (GEN_LABELS[n]) return GEN_LABELS[n];
@@ -14,13 +14,43 @@ function getGenLabel(n) {
   return `Generation ${n}`;
 }
 
-function buildArchiveSummary(member, branchLabel, education) {
+function getParentLabel(member, memberById) {
+  if (member.coParentLabel) {
+    return member.coParentLabel;
+  }
+
+  if (!member.parentMemberId) {
+    return null;
+  }
+
+  return memberById.get(member.parentMemberId)?.displayName ?? null;
+}
+
+function getMemberMedia(member) {
+  if (!member) {
+    return [];
+  }
+
+  if (member.relationToRoot === 'root_ancestor' && siteContent.archiveMedia?.legacySpotlight) {
+    return [siteContent.archiveMedia.legacySpotlight];
+  }
+
+  if (member.isBranchFounder) {
+    const founderMedia = siteContent.archiveMedia?.branchFounderMedia?.[member.branchSlug];
+    return founderMedia ? [founderMedia] : [];
+  }
+
+  return [];
+}
+
+function buildArchiveSummary(member, branchLabel, education, memberById) {
+  const parentLabel = getParentLabel(member, memberById);
   const summary = [
     `${member.displayName} is listed in the ${branchLabel ?? 'family'} archive.`,
     member.generationLevel
       ? `This record is grouped in Generation ${member.generationLevel} (${getGenLabel(member.generationLevel)}).`
       : null,
-    member.coParentLabel ? `Parent listing: ${member.coParentLabel}.` : null,
+    parentLabel ? `Parent listing: ${parentLabel}.` : null,
     member.datesLabel ? `Archive dates: ${member.datesLabel}.` : null,
     education.length
       ? `${education.length} education ${education.length === 1 ? 'record is' : 'records are'} linked to this member.`
@@ -54,7 +84,19 @@ function selectBranchMilestones(records) {
 
 /* ─── Member Modal ─── */
 
-function MemberModal({ member, education, founderBio, branchLabel, summaryText, onClose, onSubmitUpdate }) {
+function ArchiveMediaFigure({ item, compact = false }) {
+  return (
+    <figure className={`archive-media-figure${compact ? ' is-compact' : ''}`}>
+      <img className="archive-media-image" src={item.src} alt={item.alt} loading="lazy" />
+      <figcaption className="archive-media-caption">
+        <strong>{item.title}</strong>
+        <span>{item.caption}</span>
+      </figcaption>
+    </figure>
+  );
+}
+
+function MemberModal({ member, education, founderBio, branchLabel, summaryText, parentLabel, media, onClose, onSubmitUpdate }) {
   if (!member) return null;
 
   return (
@@ -70,9 +112,20 @@ function MemberModal({ member, education, founderBio, branchLabel, summaryText, 
           </span>
           <h2 className="modal-name">{member.displayName}</h2>
           {branchLabel ? <p className="modal-branch">{branchLabel}</p> : null}
-          {member.coParentLabel ? <p className="modal-parents">Parents: {member.coParentLabel}</p> : null}
+          {parentLabel ? <p className="modal-parents">Parents: {parentLabel}</p> : null}
           {member.datesLabel ? <p className="modal-dates">{member.datesLabel}</p> : null}
         </div>
+
+        {media.length > 0 ? (
+          <div className="modal-section">
+            <h3 className="modal-section-title">Archive Image</h3>
+            <div className="modal-media-grid">
+              {media.map((item) => (
+                <ArchiveMediaFigure key={item.src} item={item} compact />
+              ))}
+            </div>
+          </div>
+        ) : null}
 
         <div className="modal-section">
           <h3 className="modal-section-title">Archive Summary</h3>
@@ -124,11 +177,12 @@ function MemberModal({ member, education, founderBio, branchLabel, summaryText, 
 
 /* ─── MemberRow — recursive tree node ─── */
 
-function MemberRow({ member, childrenByParentId, eduByMemberId, depth, onMemberClick }) {
+function MemberRow({ member, memberById, childrenByParentId, eduByMemberId, depth, onMemberClick }) {
   const [expanded, setExpanded] = useState(false);
   const children = childrenByParentId.get(member.id) ?? [];
   const hasChildren = children.length > 0;
   const memberEdu = eduByMemberId.get(member.id) ?? [];
+  const parentLabel = getParentLabel(member, memberById);
 
   return (
     <div className="tree-node" data-depth={depth}>
@@ -143,7 +197,7 @@ function MemberRow({ member, childrenByParentId, eduByMemberId, depth, onMemberC
           {member.displayName}
         </button>
 
-        {member.coParentLabel ? <span className="tree-node-parents">Parents: {member.coParentLabel}</span> : null}
+        {parentLabel ? <span className="tree-node-parents">Parents: {parentLabel}</span> : null}
 
         {member.datesLabel ? <span className="tree-node-dates">{member.datesLabel}</span> : null}
 
@@ -171,6 +225,7 @@ function MemberRow({ member, childrenByParentId, eduByMemberId, depth, onMemberC
             <MemberRow
               key={child.id}
               member={child}
+              memberById={memberById}
               childrenByParentId={childrenByParentId}
               eduByMemberId={eduByMemberId}
               depth={depth + 1}
@@ -189,6 +244,7 @@ function GenerationGroup({
   genLevel,
   latestGeneration,
   members,
+  memberById,
   childrenByParentId,
   eduByMemberId,
   searchQuery,
@@ -236,6 +292,7 @@ function GenerationGroup({
             <MemberRow
               key={member.id}
               member={member}
+              memberById={memberById}
               childrenByParentId={childrenByParentId}
               eduByMemberId={eduByMemberId}
               depth={0}
@@ -267,6 +324,7 @@ function GenerationGroup({
 
 function BranchTreePanel({ members, memberSearch, onMemberSearch, branchEducation, onMemberClick }) {
   const deferredSearch = useDeferredValue(memberSearch);
+  const memberById = useMemo(() => new Map(members.map((member) => [member.id, member])), [members]);
 
   // Build parent→children index
   const childrenByParentId = useMemo(() => {
@@ -336,6 +394,7 @@ function BranchTreePanel({ members, memberSearch, onMemberSearch, branchEducatio
               genLevel={genLevel}
               latestGeneration={latestGeneration}
               members={genMembers}
+              memberById={memberById}
               childrenByParentId={childrenByParentId}
               eduByMemberId={eduByMemberId}
               searchQuery={deferredSearch}
@@ -509,6 +568,9 @@ function HeroSection({ hubData, hubStatus, onBranchSelect }) {
 /* ─── Legacy ─── */
 
 function LegacySection() {
+  const spotlight = siteContent.archiveMedia?.legacySpotlight ?? null;
+  const documents = siteContent.archiveMedia?.documents ?? [];
+
   return (
     <section className="legacy-shell" id="legacy">
       <div className="legacy-grid">
@@ -534,6 +596,31 @@ function LegacySection() {
           ))}
         </div>
       </div>
+
+      {spotlight || documents.length ? (
+        <div className="legacy-media-shell">
+          {spotlight ? (
+            <article className="legacy-spotlight-card">
+              <span className="section-label">{spotlight.eyebrow}</span>
+              <h3>{spotlight.title}</h3>
+              <ArchiveMediaFigure item={spotlight} />
+              <p>{spotlight.note}</p>
+            </article>
+          ) : null}
+
+          {documents.length ? (
+            <article className="legacy-documents-card">
+              <span className="section-label">Archive Documents</span>
+              <h3>Primary Source Scans</h3>
+              <div className="legacy-documents-grid">
+                {documents.map((item) => (
+                  <ArchiveMediaFigure key={item.src} item={item} compact />
+                ))}
+              </div>
+            </article>
+          ) : null}
+        </div>
+      ) : null}
     </section>
   );
 }
@@ -550,6 +637,8 @@ function BranchExplorer({
   onMemberSearch,
   onMemberSelect,
 }) {
+  const founderMedia = activeBranch ? siteContent.archiveMedia?.branchFounderMedia?.[activeBranch.slug] ?? null : null;
+
   return (
     <section className="branches-shell" id="branches">
       <div className="section-heading">
@@ -596,6 +685,11 @@ function BranchExplorer({
           <div className="branch-story-grid">
             <article className="panel-card">
               <h4>Founder Biography</h4>
+              {founderMedia ? (
+                <div className="branch-founder-media">
+                  <ArchiveMediaFigure item={founderMedia} compact />
+                </div>
+              ) : null}
               {(activeBranch.biography.length ? activeBranch.biography : ['No biography available yet.']).map(
                 (paragraph) => <p key={paragraph}>{paragraph}</p>,
               )}
@@ -890,6 +984,7 @@ export function PublicPage({
   const [modalMember, setModalMember] = useState(null);
   const appCredits = siteContent.appCredits;
   const branchById = useMemo(() => new Map(hubData.branches.map((branch) => [branch.id, branch])), [hubData.branches]);
+  const memberById = useMemo(() => new Map(hubData.members.map((member) => [member.id, member])), [hubData.members]);
 
   // Derive education and bio for modal
   const modalEducation = useMemo(() => {
@@ -907,19 +1002,29 @@ export function PublicPage({
 
   const modalBio = useMemo(() => {
     if (!modalMember) return null;
-    if (modalMember.isBranchFounder && activeBranch?.biography?.length) {
-      return activeBranch.biography;
+    if (modalMember.isBranchFounder && modalBranch?.biography?.length) {
+      return modalBranch.biography;
     }
     return null;
-  }, [modalMember, activeBranch]);
+  }, [modalBranch, modalMember]);
+
+  const modalMedia = useMemo(() => getMemberMedia(modalMember), [modalMember]);
 
   const modalSummary = useMemo(() => {
     if (!modalMember) {
       return '';
     }
 
-    return buildArchiveSummary(modalMember, modalBranch?.displayName, modalEducation);
-  }, [modalBranch?.displayName, modalEducation, modalMember]);
+    return buildArchiveSummary(modalMember, modalBranch?.displayName, modalEducation, memberById);
+  }, [memberById, modalBranch?.displayName, modalEducation, modalMember]);
+
+  const modalParentLabel = useMemo(() => {
+    if (!modalMember) {
+      return null;
+    }
+
+    return getParentLabel(modalMember, memberById);
+  }, [memberById, modalMember]);
 
   function handleSubmitUpdate(member) {
     setModalMember(null);
@@ -972,6 +1077,8 @@ export function PublicPage({
           founderBio={modalBio}
           branchLabel={modalBranch?.displayName ?? null}
           summaryText={modalSummary}
+          parentLabel={modalParentLabel}
+          media={modalMedia}
           onClose={() => setModalMember(null)}
           onSubmitUpdate={handleSubmitUpdate}
         />

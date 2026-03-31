@@ -120,7 +120,7 @@ export function buildFallbackHubData(content) {
       displayName: branch.name,
       datesLabel: branch.dates,
       isBranchFounder: true,
-      generationLevel: 1,
+      generationLevel: 2,
       relationToRoot: 'child',
       parentMemberId: null,
     };
@@ -140,7 +140,7 @@ export function buildFallbackHubData(content) {
     let lastChildIds = [];
 
     branch.groups.forEach((group, groupIndex) => {
-      const generationLevel = group.type === 'branch-head' ? 2 : group.type === 'child' ? 3 : 4;
+      const generationLevel = group.type === 'branch-head' ? 3 : group.type === 'child' ? 4 : 5;
       const currentIds = [];
 
       splitNames(group.text).forEach((name, nameIndex) => {
