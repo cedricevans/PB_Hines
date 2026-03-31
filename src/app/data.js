@@ -50,6 +50,21 @@ function normalizePersonName(value) {
     .toLowerCase();
 }
 
+function educationKey(record) {
+  return [
+    record.branchSlug ?? '',
+    normalizePersonName(record.memberName ?? ''),
+    String(record.credentialSummary ?? '').trim().toLowerCase(),
+  ].join('::');
+}
+
+function memberKey(member) {
+  return [
+    member.branchSlug ?? '',
+    normalizePersonName(member.displayName ?? ''),
+  ].join('::');
+}
+
 const FALLBACK_PARENT_OVERRIDES = {
   johnny: {
     'imani evans': 'cedric evans',
@@ -271,6 +286,92 @@ export function mapRemoteHubData(branchRows, memberRows, educationRows) {
       branches: branches.length,
       members: members.length,
       education: education.length,
+    },
+  };
+}
+
+export function mergeHubDataWithFallback(remoteHubData, fallbackHubData) {
+  const mergedBranchesBySlug = new Map();
+  const fallbackBranchBySlug = new Map(fallbackHubData.branches.map((branch) => [branch.slug, branch]));
+
+  remoteHubData.branches.forEach((branch) => {
+    const fallbackBranch = fallbackBranchBySlug.get(branch.slug);
+
+    mergedBranchesBySlug.set(branch.slug, {
+      ...(fallbackBranch ?? {}),
+      ...branch,
+      biography: branch.biography?.length ? branch.biography : (fallbackBranch?.biography ?? []),
+      quote: branch.quote ?? fallbackBranch?.quote ?? null,
+    });
+  });
+
+  fallbackHubData.branches.forEach((branch) => {
+    if (!mergedBranchesBySlug.has(branch.slug)) {
+      mergedBranchesBySlug.set(branch.slug, branch);
+    }
+  });
+
+  const canonicalBranchIdBySlug = new Map(
+    [...mergedBranchesBySlug.values()].map((branch) => [branch.slug, branch.id]),
+  );
+
+  const mergedMembers = remoteHubData.members.map((member) => ({
+    ...member,
+    branchId: canonicalBranchIdBySlug.get(member.branchSlug) ?? member.branchId,
+  }));
+  const seenMembers = new Set(remoteHubData.members.map(memberKey));
+
+  fallbackHubData.members.forEach((member) => {
+    const key = memberKey(member);
+
+    if (!seenMembers.has(key)) {
+      mergedMembers.push({
+        ...member,
+        branchId: canonicalBranchIdBySlug.get(member.branchSlug) ?? member.branchId,
+      });
+      seenMembers.add(key);
+    }
+  });
+
+  const mergedEducation = remoteHubData.education.map((record) => ({
+    ...record,
+    branchId: canonicalBranchIdBySlug.get(record.branchSlug) ?? record.branchId,
+  }));
+  const seenEducation = new Set(remoteHubData.education.map(educationKey));
+
+  fallbackHubData.education.forEach((record) => {
+    const key = educationKey(record);
+
+    if (!seenEducation.has(key)) {
+      mergedEducation.push({
+        ...record,
+        branchId: canonicalBranchIdBySlug.get(record.branchSlug) ?? record.branchId,
+      });
+      seenEducation.add(key);
+    }
+  });
+
+  const mergedBranches = [...mergedBranchesBySlug.values()]
+    .map((branch) => {
+      const memberCount = mergedMembers.filter((member) => member.branchSlug === branch.slug).length;
+      const educationCount = mergedEducation.filter((record) => record.branchSlug === branch.slug).length;
+
+      return {
+        ...branch,
+        memberCount,
+        educationCount,
+      };
+    })
+    .sort((left, right) => (left.treeNumber ?? 999) - (right.treeNumber ?? 999));
+
+  return {
+    branches: mergedBranches,
+    members: mergedMembers,
+    education: mergedEducation,
+    summaryStats: {
+      branches: mergedBranches.length,
+      members: mergedMembers.length,
+      education: mergedEducation.length,
     },
   };
 }

@@ -348,6 +348,29 @@ function BranchTreePanel({ members, memberSearch, onMemberSearch, branchEducatio
   );
 }
 
+function ApplicationCreditCard({ appCredits }) {
+  return (
+    <article className="panel-card credit-card">
+      <span className="section-label">Family Development</span>
+      <h4>{appCredits.title}</h4>
+      {appCredits.callout ? <div className="credit-callout">{appCredits.callout}</div> : null}
+      <p className="credit-summary">{appCredits.summary}</p>
+      <a className="credit-link" href={appCredits.websiteHref} target="_blank" rel="noreferrer">
+        {appCredits.websiteLabel}
+      </a>
+      <div className="credit-role-grid">
+        {appCredits.roles.map((person) => (
+          <div className="credit-role-card" key={person.name}>
+            <strong>{person.name}</strong>
+            <span>{person.role}</span>
+            <p>{person.note}</p>
+          </div>
+        ))}
+      </div>
+    </article>
+  );
+}
+
 /* ─── Global Member Search ─── */
 
 function GlobalSearch({ hubData, onBranchSelect }) {
@@ -865,6 +888,7 @@ export function PublicPage({
   onPrefillMemberUpdate,
 }) {
   const [modalMember, setModalMember] = useState(null);
+  const appCredits = siteContent.appCredits;
   const branchById = useMemo(() => new Map(hubData.branches.map((branch) => [branch.id, branch])), [hubData.branches]);
 
   // Derive education and bio for modal
@@ -921,6 +945,11 @@ export function PublicPage({
         onMemberSearch={onMemberSearch}
         onMemberSelect={setModalMember}
       />
+      <section className="credit-shell" id="family-development">
+        <div className="credit-layout">
+          <ApplicationCreditCard appCredits={appCredits} />
+        </div>
+      </section>
       <EducationSection education={hubData.education} />
       <UpdateCenter
         hubData={hubData}

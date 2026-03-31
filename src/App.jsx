@@ -13,7 +13,7 @@ import {
 } from './lib/hinesApi';
 import { supabase } from './lib/supabase';
 import { EMPTY_AUTH_FORM, EMPTY_FORM } from './app/constants';
-import { buildFallbackHubData, mapRemoteHubData } from './app/data';
+import { buildFallbackHubData, mapRemoteHubData, mergeHubDataWithFallback } from './app/data';
 import { blankToNull, buildDefaultSubject, getRouteView } from './app/utils';
 import { PublicPage } from './components/public/PublicPage';
 import { AdminPage } from './components/admin/AdminPage';
@@ -101,10 +101,11 @@ export default function App() {
 
         if (!ignore) {
           const mapped = mapRemoteHubData(branchResult.data ?? [], memberResult.data ?? [], educationResult.data ?? []);
+          const merged = mergeHubDataWithFallback(mapped, fallbackHubData);
 
           setTenant(tenantResult.data);
-          setHubData(mapped);
-          setSelectedBranchId((current) => current ?? mapped.branches[0]?.id ?? null);
+          setHubData(merged);
+          setSelectedBranchId((current) => current ?? merged.branches[0]?.id ?? null);
           setHubStatus({
             kind: 'live',
             message: `Live archive connected for ${tenantResult.data.display_name}.`,

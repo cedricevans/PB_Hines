@@ -1712,6 +1712,14 @@ section { padding: 6rem 2rem; }
 @media (max-width: 768px) {
   section { padding: 4rem 1.25rem; }
   .shell-nav { display: none; }
+  .hero-shell {
+    background:
+      linear-gradient(160deg, rgba(26,18,9,0.992) 0%, rgba(61,43,14,0.975) 60%, rgba(92,58,16,0.968) 100%),
+      url('/pb_hine.PNG');
+    background-repeat: no-repeat, no-repeat;
+    background-size: cover, 92vw;
+    background-position: center center, 78% center;
+  }
   .hero-data-grid { grid-template-columns: repeat(2, 1fr); padding: 0 1.25rem 3rem; }
   .legacy-grid { grid-template-columns: 1fr; }
   .legacy-stats-grid { grid-template-columns: 1fr 1fr; }
